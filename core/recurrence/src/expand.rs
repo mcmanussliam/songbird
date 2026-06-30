@@ -62,8 +62,6 @@ pub fn expand_occurrences(
     final_occurrences
 }
 
-// ─── Date-only generation ────────────────────────────────────────────────────
-
 fn generate_date_occurrences(
     rule: &RecurrenceRule,
     start: NaiveDate,
@@ -265,8 +263,6 @@ fn yearly_date(
     }
 }
 
-// ─── DateTime generation ─────────────────────────────────────────────────────
-
 fn generate_datetime_occurrences(
     rule: &RecurrenceRule,
     start: NaiveDateTime,
@@ -455,8 +451,6 @@ fn generate_datetime_occurrences(
         }
     }
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /// Expand BYDAY for a single month: returns all matching NaiveDates.
 fn expand_byday_monthly(year: i32, month: u32, wd: &WeekdayOrdinal) -> Option<Vec<NaiveDate>> {

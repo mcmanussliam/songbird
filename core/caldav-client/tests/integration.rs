@@ -58,8 +58,6 @@ fn test_ical(uid: &str, summary: &str, dtstart: &str, dtend: &str) -> String {
     )
 }
 
-// ── Radicale ──────────────────────────────────────────────────────────────────
-
 #[tokio::test]
 #[ignore]
 async fn radicale_discovery() {
