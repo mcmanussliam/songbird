@@ -22,9 +22,10 @@ thin pointer plus a few operating rules, not a second source of truth.
 Check `docs/design/system-design.md` §14 for the milestone table. **Update this section** when a
 milestone completes, so the next agent session knows where things stand:
 
-> **Status:** Not started. Next up: M1 — Core foundation (`songbird-storage`,
-> `songbird-recurrence`, `songbird-ical`, §11.1 conformance corpus). No UI work until M1's exit
-> criteria are met.
+> **Status:** M1 complete. `songbird-ical` (RFC 5545 parser/serializer), `songbird-recurrence`
+> (RRULE parser + occurrence expander), and `songbird-storage` (SQLite + WAL + migrations +
+> typed repo) are implemented. §11.1 conformance corpus passes 10/10. Next up: M2 — CalDAV
+> client (`songbird-caldav-client`, two-way sync against Nextcloud/Radicale/Fastmail).
 
 ## Repository layout
 
