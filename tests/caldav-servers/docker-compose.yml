@@ -1,0 +1,17 @@
+services:
+  radicale:
+    image: tomsquest/docker-radicale:latest
+    ports:
+      - "5232:5232"
+    volumes:
+      - ./radicale/config:/config/config:ro
+      - ./radicale/htpasswd:/config/htpasswd:ro
+      - radicale-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5232"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  radicale-data:

@@ -319,6 +319,33 @@ impl CalDavClient {
         Ok(outcome)
     }
 
+    /// Create a calendar collection at `href` (RFC 4791 §5.3.1 MKCALENDAR).
+    ///
+    /// Returns `Ok(())` if the calendar was created (201) or already existed (405/409).
+    pub async fn create_calendar(&self, href: &str, display_name: &str) -> Result<(), CalDavError> {
+        let method = Method::from_bytes(b"MKCALENDAR").expect("static");
+        let body = format!(
+            concat!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
+                "<C:mkcalendar xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:D=\"DAV:\">",
+                "<D:set><D:prop><D:displayname>{}</D:displayname></D:prop></D:set>",
+                "</C:mkcalendar>"
+            ),
+            display_name
+        );
+        let url = self.resolve_href(href)?;
+        let resp = self.apply_auth(
+            self.http.request(method, &url)
+                .header("Content-Type", "application/xml; charset=utf-8")
+                .body(body),
+        ).send().await?;
+        match resp.status().as_u16() {
+            201 | 204 => Ok(()),
+            405 | 409 => Ok(()), // already exists
+            code => Err(CalDavError::Protocol(format!("MKCALENDAR returned HTTP {} at {}", code, url))),
+        }
+    }
+
     /// Sync a calendar collection, returning changed/deleted resources with their content.
     ///
     /// Tries RFC 6578 sync-collection REPORT first, falls back to CTag/ETag polling.
