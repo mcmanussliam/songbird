@@ -1,8 +1,5 @@
-//! Encryption primitives. See system-design.md §8 for the full key-management design.
-//!
-//! This crate has NO knowledge of CalDAV, storage, or sync — pure, independently auditable
-//! crypto primitives only. See AGENTS.md rule 2: a server-side decryption key must never
-//! exist anywhere in this system. Nothing in this crate should make that possible.
+//! Encryption primitives. No knowledge of CalDAV, storage, or sync — pure, independently
+//! auditable crypto. A server-side decryption key must never exist anywhere in this system.
 
 use thiserror::Error;
 
@@ -14,9 +11,9 @@ pub enum CryptoError {
     DecryptFailed,
 }
 
-/// Per-calendar symmetric content key (XChaCha20-Poly1305). TODO(M4): implement
-/// generate/encrypt/decrypt, plus the X25519 ECDH + HKDF envelope-wrapping flow used during
-/// group invites (system-design.md §8.3) and the on-device push-delta decrypt flow (§7.6, §15.5).
+/// Per-calendar symmetric content key (XChaCha20-Poly1305).
+/// TODO(M4): implement generate/encrypt/decrypt, plus the X25519 ECDH + HKDF
+/// envelope-wrapping flow for group invites and the on-device push-delta decrypt flow.
 pub struct CalendarKey {
     _private: (),
 }

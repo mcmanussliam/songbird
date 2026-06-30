@@ -1,7 +1,7 @@
-//! SQLite-backed local store. See system-design.md §5.4.
+//! SQLite-backed local store.
 //!
-//! Invariants (do not relax without an ADR):
-//! - Soft deletes only: `deleted_at` is set, never a hard DELETE (AGENTS.md rule 4).
+//! Invariants:
+//! - Soft deletes only: `deleted_at` is set, never a hard DELETE.
 //! - dtstart/dtend stored as UTC epoch milliseconds. The display timezone is reconstructed
 //!   from the `timezone` column at read time, never inferred from the device locale.
 //! - WAL mode enabled on open for safe concurrent reads from a background sync isolate.

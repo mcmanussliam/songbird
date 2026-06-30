@@ -1,9 +1,7 @@
 //! RFC 5545 §3.3.10 recurrence rule parsing and expansion.
 //!
-//! See system-design.md §5.5. No internal workspace dependencies — independently
-//! testable and eventually publishable (AGENTS.md rule 1).
-//!
-//! Conformance: all public functions are exercised by core/tests/conformance/ (AGENTS.md rule 3).
+//! No internal workspace dependencies — independently testable and eventually publishable.
+//! All public functions are exercised by the conformance suite in core/tests/conformance/.
 
 mod expand;
 mod rule;

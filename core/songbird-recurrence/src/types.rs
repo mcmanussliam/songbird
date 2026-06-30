@@ -1,7 +1,7 @@
 use chrono::{NaiveDate, NaiveDateTime, Weekday};
 
 /// Mirror of songbird-ical's DateOrDateTime, defined independently so this crate
-/// has no internal workspace dependencies (AGENTS.md rule 1 / system-design.md §5.2).
+/// has no internal workspace dependencies.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum DateOrDateTime {
     Date(NaiveDate),

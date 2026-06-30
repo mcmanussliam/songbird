@@ -1,7 +1,4 @@
-//! CalDAV client. See system-design.md §5.9 / §9.1.
-//!
-//! M2 exit criteria (system-design.md §14): two-way sync validated against live Nextcloud,
-//! Radicale, and Fastmail instances, with the §11.1 conformance corpus passing throughout.
+//! CalDAV client (RFC 4791) — inbound sync against third-party servers.
 
 use thiserror::Error;
 
