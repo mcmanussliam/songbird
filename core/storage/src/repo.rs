@@ -3,6 +3,36 @@ use uuid::Uuid;
 
 use crate::{StorageError, model::*};
 
+fn row_to_calendar(row: &rusqlite::Row<'_>) -> rusqlite::Result<Result<Calendar, StorageError>> {
+    let id_str: String = row.get(0)?;
+    let group_id_str: Option<String> = row.get(1)?;
+    let source_str: String = row.get(3)?;
+    let enc_key_str: Option<String> = row.get(5)?;
+    let created_at_ms: i64 = row.get(6)?;
+    Ok(Ok(Calendar {
+        id: id_str
+            .parse()
+            .map_err(|_| StorageError::Corruption(format!("bad calendar id: {id_str}")))
+            .unwrap_or_else(|_| Uuid::nil()),
+        group_id: group_id_str
+            .map(|s| {
+                s.parse()
+                    .map_err(|_| StorageError::Corruption(format!("bad group id: {s}")))
+                    .unwrap_or_else(|_| Uuid::nil())
+            }),
+        display_name: row.get(2)?,
+        source: CalendarSource::from_str(&source_str)
+            .unwrap_or(CalendarSource::Local),
+        source_config: row.get(4)?,
+        encryption_key_id: enc_key_str.map(|s| {
+            s.parse()
+                .map_err(|_| StorageError::Corruption(format!("bad key id: {s}")))
+                .unwrap_or_else(|_| Uuid::nil())
+        }),
+        created_at: chrono::DateTime::from_timestamp_millis(created_at_ms).unwrap_or_default(),
+    }))
+}
+
 pub struct Repo<'a> {
     pub(crate) conn: &'a Connection,
 }
@@ -44,33 +74,10 @@ impl<'a> Repo<'a> {
                 "SELECT id, group_id, display_name, source_type, source_config, encryption_key_id, created_at
                  FROM calendars WHERE id = ?1",
                 params![id.to_string()],
-                |row| {
-                    let id_str: String = row.get(0)?;
-                    let group_id_str: Option<String> = row.get(1)?;
-                    let source_str: String = row.get(3)?;
-                    let enc_key_str: Option<String> = row.get(5)?;
-                    let created_at_ms: i64 = row.get(6)?;
-                    Ok((id_str, group_id_str, row.get::<_, String>(2)?, source_str, row.get::<_, String>(4)?, enc_key_str, created_at_ms))
-                },
+                row_to_calendar,
             )
             .optional()?
-            .map(|(id_str, group_id_str, display_name, source_str, source_config, enc_key_str, created_at_ms)| {
-                Ok(Calendar {
-                    id: id_str.parse().map_err(|_| StorageError::Corruption(format!("bad calendar id: {id_str}")))?,
-                    group_id: group_id_str
-                        .map(|s| s.parse().map_err(|_| StorageError::Corruption(format!("bad group id: {s}"))))
-                        .transpose()?,
-                    display_name,
-                    source: CalendarSource::from_str(&source_str)
-                        .ok_or_else(|| StorageError::Corruption(format!("unknown source type: {source_str}")))?,
-                    source_config,
-                    encryption_key_id: enc_key_str
-                        .map(|s| s.parse().map_err(|_| StorageError::Corruption(format!("bad key id: {s}"))))
-                        .transpose()?,
-                    created_at: chrono::DateTime::from_timestamp_millis(created_at_ms)
-                        .unwrap_or_default(),
-                })
-            })
+            .map(|r| r)
             .transpose()
     }
 
@@ -166,6 +173,138 @@ impl<'a> Repo<'a> {
             ],
         )?;
         Ok(())
+    }
+
+    pub fn get_sync_cursor(
+        &self,
+        calendar_id: Uuid,
+        transport: &SyncTransport,
+    ) -> Result<Option<SyncCursor>, StorageError> {
+        self.conn
+            .query_row(
+                "SELECT calendar_id, transport, cursor_token, last_synced_at
+                 FROM sync_cursors WHERE calendar_id = ?1 AND transport = ?2",
+                params![calendar_id.to_string(), transport.as_str()],
+                |row| {
+                    let cal_id_str: String = row.get(0)?;
+                    let transport_str: String = row.get(1)?;
+                    Ok((cal_id_str, transport_str, row.get::<_, Option<String>>(2)?, row.get::<_, Option<i64>>(3)?))
+                },
+            )
+            .optional()?
+            .map(|(cal_id_str, transport_str, cursor_token, last_synced_at_ms)| {
+                Ok(SyncCursor {
+                    calendar_id: cal_id_str.parse().map_err(|_| {
+                        StorageError::Corruption(format!("bad calendar_id in sync_cursors: {cal_id_str}"))
+                    })?,
+                    transport: match transport_str.as_str() {
+                        "caldav" => SyncTransport::CalDav,
+                        _ => SyncTransport::NativeSync,
+                    },
+                    cursor_token,
+                    last_synced_at_ms,
+                })
+            })
+            .transpose()
+    }
+
+    pub fn list_calendars(&self) -> Result<Vec<Calendar>, StorageError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, group_id, display_name, source_type, source_config, encryption_key_id, created_at
+             FROM calendars ORDER BY created_at",
+        )?;
+        let rows = stmt.query_map([], row_to_calendar)?;
+        rows.map(|r| r.map_err(StorageError::from).and_then(|inner| inner))
+            .collect()
+    }
+
+    pub fn update_event(&self, ev: &UpdateEvent) -> Result<bool, StorageError> {
+        let n = self.conn.execute(
+            "UPDATE events SET
+               summary = ?2, description = ?3, location = ?4,
+               dtstart = ?5, dtstart_is_date_only = ?6, dtend = ?7, dtend_is_date_only = ?8,
+               timezone = ?9, rrule = ?10, rdate = ?11, exdate = ?12,
+               sequence = ?13, status = ?14, last_modified = ?15, etag = ?16
+             WHERE id = ?1 AND deleted_at IS NULL",
+            params![
+                ev.id,
+                ev.summary,
+                ev.description,
+                ev.location,
+                ev.dtstart_ms,
+                ev.dtstart_is_date_only as i32,
+                ev.dtend_ms,
+                ev.dtend_is_date_only as i32,
+                ev.timezone,
+                ev.rrule,
+                ev.rdate,
+                ev.exdate,
+                ev.sequence,
+                ev.status.as_str(),
+                ev.last_modified_ms,
+                ev.etag,
+            ],
+        )?;
+        Ok(n > 0)
+    }
+
+    /// INSERT OR REPLACE — used by CalDAV sync to upsert incoming events.
+    pub fn upsert_event(&self, ev: &NewEvent) -> Result<(), StorageError> {
+        self.conn.execute(
+            "INSERT INTO events
+             (id, calendar_id, summary, description, location,
+              dtstart, dtstart_is_date_only, dtend, dtend_is_date_only, timezone,
+              rrule, rdate, exdate, recurrence_id, sequence, status, last_modified, etag)
+             VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18)
+             ON CONFLICT(id) DO UPDATE SET
+               summary = excluded.summary,
+               description = excluded.description,
+               location = excluded.location,
+               dtstart = excluded.dtstart,
+               dtstart_is_date_only = excluded.dtstart_is_date_only,
+               dtend = excluded.dtend,
+               dtend_is_date_only = excluded.dtend_is_date_only,
+               timezone = excluded.timezone,
+               rrule = excluded.rrule,
+               rdate = excluded.rdate,
+               exdate = excluded.exdate,
+               recurrence_id = excluded.recurrence_id,
+               sequence = excluded.sequence,
+               status = excluded.status,
+               last_modified = excluded.last_modified,
+               etag = excluded.etag,
+               deleted_at = NULL",
+            params![
+                ev.id,
+                ev.calendar_id.to_string(),
+                ev.summary,
+                ev.description,
+                ev.location,
+                ev.dtstart_ms,
+                ev.dtstart_is_date_only as i32,
+                ev.dtend_ms,
+                ev.dtend_is_date_only as i32,
+                ev.timezone,
+                ev.rrule,
+                ev.rdate,
+                ev.exdate,
+                ev.recurrence_id_ms,
+                ev.sequence,
+                ev.status.as_str(),
+                ev.last_modified_ms,
+                ev.etag,
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// All non-deleted events for a calendar, used during full CalDAV syncs to detect deletions.
+    pub fn all_active_event_ids_for_calendar(&self, calendar_id: Uuid) -> Result<Vec<String>, StorageError> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id FROM events WHERE calendar_id = ?1 AND deleted_at IS NULL",
+        )?;
+        let rows = stmt.query_map(params![calendar_id.to_string()], |row| row.get(0))?;
+        rows.map(|r| r.map_err(StorageError::from)).collect()
     }
 }
 

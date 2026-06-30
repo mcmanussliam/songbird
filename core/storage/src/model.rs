@@ -112,6 +112,25 @@ pub struct NewEvent {
     pub etag: Option<String>,
 }
 
+pub struct UpdateEvent {
+    pub id: String,
+    pub summary: String,
+    pub description: Option<String>,
+    pub location: Option<String>,
+    pub dtstart_ms: i64,
+    pub dtstart_is_date_only: bool,
+    pub dtend_ms: i64,
+    pub dtend_is_date_only: bool,
+    pub timezone: Option<String>,
+    pub rrule: Option<String>,
+    pub rdate: Option<String>,
+    pub exdate: Option<String>,
+    pub sequence: u32,
+    pub status: EventStatus,
+    pub last_modified_ms: i64,
+    pub etag: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SyncTransport {
     CalDav,

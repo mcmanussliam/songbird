@@ -1332,6 +1332,8 @@ name = "songbird-core"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "serde",
+ "serde_json",
  "songbird-caldav-adapter",
  "songbird-caldav-client",
  "songbird-crypto",
