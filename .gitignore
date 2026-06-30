@@ -23,9 +23,9 @@ app/.idea/
 app/lib/bridge_generated/
 app/rust_bridge/target/
 
-# Sync service
-sync-service/**/target/
-sync-service/deploy/.env
+# Server
+server/**/target/
+server/deploy/.env
 
 # Editors / OS
 .DS_Store
