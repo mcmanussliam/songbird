@@ -1,0 +1,26 @@
+[package]
+name = "songbird-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Top-level FFI surface — the only crate flutter_rust_bridge generates Dart bindings from"
+
+[lib]
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio.workspace = true
+songbird-storage = { path = "../storage" }
+songbird-recurrence = { path = "../recurrence" }
+songbird-ical = { path = "../ical" }
+songbird-sync = { path = "../sync" }
+songbird-crypto = { path = "../crypto" }
+songbird-caldav-client = { path = "../caldav-client" }
+songbird-caldav-adapter = { path = "../caldav-adapter" }
+# flutter_rust_bridge codegen dependency — add once `app/rust_bridge/` is initialized (M3).
+# flutter_rust_bridge = "2"
+
+[dev-dependencies]

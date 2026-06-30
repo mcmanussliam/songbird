@@ -5,7 +5,9 @@ pub enum DateOrDateTime {
     Date(NaiveDate),
     DateTime {
         local: NaiveDateTime,
+        /// IANA timezone name (e.g. "Europe/Berlin"). `None` with `is_utc = false` = floating time.
         tzid: Option<String>,
+        /// `true` when the value had a trailing `Z` (UTC); `false` + no tzid = floating.
         is_utc: bool,
     },
 }

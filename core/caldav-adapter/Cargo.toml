@@ -1,0 +1,15 @@
+[package]
+name = "songbird-caldav-adapter"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local CalDAV server — outbound interop adapter (Phase 2 / M6)"
+
+[dependencies]
+thiserror.workspace = true
+tokio.workspace = true
+songbird-ical = { path = "../ical" }
+songbird-crypto = { path = "../crypto" }
+axum = "0.7"
+
+[dev-dependencies]

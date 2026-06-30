@@ -3,7 +3,7 @@ name = "songbird-crypto"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Encryption primitives: per-calendar content keys, device key pairs, envelope encryption. See system-design.md §8."
+description = "Encryption primitives: per-calendar content keys, device key pairs, envelope encryption"
 
 [dependencies]
 thiserror.workspace = true

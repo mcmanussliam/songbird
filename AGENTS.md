@@ -22,37 +22,39 @@ thin pointer plus a few operating rules, not a second source of truth.
 Check `docs/design/system-design.md` §14 for the milestone table. **Update this section** when a
 milestone completes, so the next agent session knows where things stand:
 
-> **Status:** M1 complete. `songbird-ical` (RFC 5545 parser/serializer), `songbird-recurrence`
-> (RRULE parser + occurrence expander), and `songbird-storage` (SQLite + WAL + migrations +
-> typed repo) are implemented. §11.1 conformance corpus passes 10/10. Next up: M2 — CalDAV
-> client (`songbird-caldav-client`, two-way sync against Nextcloud/Radicale/Fastmail).
+> **Status:** M2 complete. `songbird-ical` (RFC 5545 parser/serializer), `songbird-recurrence`
+> (RRULE parser + occurrence expander), `songbird-storage` (SQLite + WAL + migrations + typed
+> repo), and `songbird-caldav-client` (RFC 4791 CalDAV client, two-way sync validated against
+> Radicale) are implemented. Next up: M3 — bare Flutter client app (local calendars + CalDAV
+> sync only, F1–F7 functional).
 
 ## Repository layout
 
 ```
 songbird/
-├── core/                          Rust workspace — see system-design.md §5
-│   ├── songbird-storage/          SQLite-backed local store
-│   ├── songbird-recurrence/       RFC 5545 recurrence expansion (pure, no internal deps)
-│   ├── songbird-ical/             iCalendar parse/serialize (pure, no internal deps)
-│   ├── songbird-sync/             sync engine: merge, change tracking, conflict resolution
-│   ├── songbird-crypto/           encryption, key management, envelope crypto
-│   ├── songbird-caldav-client/    CalDAV client — inbound, talks to 3rd-party servers
-│   ├── songbird-caldav-adapter/   CalDAV adapter — outbound local server (Phase 2)
-│   ├── songbird-core/             top-level crate, the ONLY crate exposed to Dart via FFI
-│   └── tests/conformance/         seed corpus — real recurrence/iCalendar bugs as regression tests
-├── app/                           Flutter app, see §6
-│   ├── lib/presentation/          widgets/screens only, no bridge calls
-│   ├── lib/state/                 Riverpod providers, owns all bridge calls
-│   ├── lib/platform/              push registration, widgets, share sheet, deep links
-│   ├── lib/plugin_api/            plugin extension points (§13), stubbed in Phase 1
-│   └── rust_bridge/               flutter_rust_bridge generated + hand-written glue
-├── sync-service/                  Backend, see §7 — songbird-server crate
-│   └── deploy/                    Docker Compose self-hosting on-ramp
+├── core/                    Rust workspace (package names keep the songbird- prefix)
+│   ├── storage/             SQLite-backed local store
+│   ├── recurrence/          RFC 5545 recurrence expansion (pure, no internal deps)
+│   ├── ical/                iCalendar parse/serialize (pure, no internal deps)
+│   ├── sync/                sync engine: merge, change tracking, conflict resolution
+│   ├── crypto/              encryption, key management, envelope crypto
+│   ├── caldav-client/       CalDAV client — inbound, talks to 3rd-party servers
+│   ├── caldav-adapter/      CalDAV adapter — outbound local server (Phase 2)
+│   ├── core/                top-level FFI crate, the ONLY one exposed to Dart
+│   └── tests/conformance/   seed corpus — real recurrence/iCalendar bugs as regression tests
+├── app/                     Flutter app, see §6
+│   ├── lib/presentation/    widgets/screens only, no bridge calls
+│   ├── lib/state/           Riverpod providers, owns all bridge calls
+│   ├── lib/platform/        push registration, widgets, share sheet, deep links
+│   ├── lib/plugin_api/      plugin extension points (§13), stubbed in Phase 1
+│   └── rust_bridge/         flutter_rust_bridge generated + hand-written glue
+├── server/                  Backend, see §7 — songbird-server crate
+│   └── deploy/              Docker Compose self-hosting on-ramp
+├── tests/caldav-servers/    Docker Compose for CalDAV integration test servers
 ├── docs/
-│   ├── design/                    This project's two design docs (read-only references)
-│   ├── adr/                       Architecture Decision Records — add one per non-obvious decision
-│   └── api/                       Generated API docs
+│   ├── design/              authoritative design docs (read-only references)
+│   ├── adr/                 Architecture Decision Records
+│   └── api/                 Generated API docs
 ```
 
 ## Build & test
@@ -65,11 +67,14 @@ cd core && cargo build && cargo test
 # songbird-recurrence or songbird-ical — see system-design.md §11.1)
 cd core && cargo test -p songbird-recurrence -p songbird-ical conformance
 
+# CalDAV integration tests (requires Radicale running — see tests/caldav-servers/)
+cd core && cargo test -p songbird-caldav-client -- --include-ignored
+
 # Flutter app
 cd app && flutter pub get && flutter test
 
-# Sync service
-cd sync-service && cargo build && cargo test
+# Server
+cd server && cargo build && cargo test
 ```
 
 ## Rules an agent should not violate

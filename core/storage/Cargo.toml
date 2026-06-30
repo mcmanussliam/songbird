@@ -3,7 +3,7 @@ name = "songbird-storage"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "SQLite-backed local store, the canonical on-device source of truth. See system-design.md §5.4."
+description = "SQLite-backed local store — the canonical on-device source of truth"
 
 [dependencies]
 thiserror.workspace = true

@@ -1,14 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
-    "songbird-storage",
-    "songbird-recurrence",
-    "songbird-ical",
-    "songbird-sync",
-    "songbird-crypto",
-    "songbird-caldav-client",
-    "songbird-caldav-adapter",
-    "songbird-core",
+    "storage",
+    "recurrence",
+    "ical",
+    "sync",
+    "crypto",
+    "caldav-client",
+    "caldav-adapter",
+    "core",
 ]
 
 [workspace.package]

@@ -68,6 +68,8 @@ pub struct DateRange {
 
 impl DateRange {
     pub fn contains(&self, dt: &DateOrDateTime) -> bool {
+        // Compare by calendar date, not enum discriminant: PartialOrd on DateOrDateTime
+        // compares discriminants first, so Date < DateTime even when the date is the same.
         let d = dt.naive_date();
         d >= self.start.naive_date() && d < self.end.naive_date()
     }

@@ -1,0 +1,16 @@
+[package]
+name = "songbird-sync"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Sync engine: change tracking and conflict resolution"
+
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+songbird-storage = { path = "../storage" }
+songbird-ical = { path = "../ical" }
+songbird-crypto = { path = "../crypto" }
+
+[dev-dependencies]

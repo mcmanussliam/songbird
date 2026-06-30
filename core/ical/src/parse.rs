@@ -2,7 +2,6 @@ use chrono::{NaiveDate, NaiveDateTime};
 
 use crate::{IcalError, types::*};
 
-
 /// Unfold RFC 5545 §3.1 line folding: CRLF (or bare LF) followed by a
 /// space or tab is a continuation — strip the line break and leading whitespace.
 pub(crate) fn unfold(ics: &str) -> String {
