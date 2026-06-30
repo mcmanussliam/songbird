@@ -2,6 +2,7 @@ use chrono::{NaiveDate, NaiveDateTime};
 
 use crate::{IcalError, types::*};
 
+
 /// Unfold RFC 5545 §3.1 line folding: CRLF (or bare LF) followed by a
 /// space or tab is a continuation — strip the line break and leading whitespace.
 pub(crate) fn unfold(ics: &str) -> String {
@@ -34,6 +35,7 @@ pub(crate) fn unfold(ics: &str) -> String {
 
 /// Parse one unfolded content line into (name, params[(k,v)], value).
 /// Returns None for blank lines.
+#[allow(clippy::type_complexity)]
 pub(crate) fn parse_content_line(line: &str) -> Option<(&str, Vec<(String, String)>, String)> {
     let line = line.trim_end_matches('\r');
     if line.is_empty() {
