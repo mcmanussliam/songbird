@@ -1,0 +1,12 @@
+[package]
+name = "songbird-recurrence"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "RFC 5545 recurrence rule parsing and expansion. Pure logic, no internal crate dependencies — see AGENTS.md rule 1."
+
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]

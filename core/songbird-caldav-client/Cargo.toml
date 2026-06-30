@@ -1,0 +1,15 @@
+[package]
+name = "songbird-caldav-client"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CalDAV client (RFC 4791) — inbound sync to third-party servers. See system-design.md §5.9 and §9.1."
+
+[dependencies]
+thiserror.workspace = true
+tokio.workspace = true
+songbird-ical = { path = "../songbird-ical" }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+quick-xml = "0.31"
+
+[dev-dependencies]

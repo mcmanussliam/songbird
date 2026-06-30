@@ -1,0 +1,21 @@
+[package]
+name = "songbird-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Songbird sync service: push delivery, group invites, presence, granular sharing. See system-design.md §7."
+
+[dependencies]
+thiserror = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+axum = "0.7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+# Shares songbird-ical and songbird-crypto directly with the core workspace (finalized per
+# system-design.md §15.3) — no duplicate iCalendar/crypto implementation server-side.
+songbird-ical = { path = "../../core/songbird-ical" }
+songbird-crypto = { path = "../../core/songbird-crypto" }
+
+[dev-dependencies]

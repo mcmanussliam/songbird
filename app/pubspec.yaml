@@ -1,0 +1,34 @@
+name: songbird
+description: >
+  Songbird — a local-first, end-to-end-encrypted, group-first shared calendar.
+  Flutter UI layer; business logic lives in ../core (Rust), bridged via flutter_rust_bridge.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # State management — see system-design.md §6.1: Riverpod over Provider/Bloc/GetX for
+  # compile-time-safe DI and first-class async/stream provider support.
+  flutter_riverpod: ^2.5.0
+  riverpod_annotation: ^2.3.0
+  # Declarative routing + deep links (invite links, .ics/webcal file-open intents) — §6.1.
+  go_router: ^14.0.0
+  # On-device reminder scheduling (F7) — push delivery (F12) is a separate path, see §6.5/§7.6.
+  flutter_local_notifications: ^17.0.0
+  # FFI bridge to the Rust core — codegen output lives in rust_bridge/, see that dir's README.
+  # flutter_rust_bridge: ^2.0.0   # uncomment once `app/rust_bridge/` codegen is initialized (M3)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  riverpod_generator: ^2.4.0
+  build_runner: ^2.4.0
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

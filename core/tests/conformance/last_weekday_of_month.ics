@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Songbird//Conformance Fixtures//EN
+BEGIN:VEVENT
+UID:conformance-last-weekday-of-month@songbird
+SUMMARY:Last Saturday clean-up
+DTSTART;TZID=America/New_York:20260103T100000
+DTEND;TZID=America/New_York:20260103T120000
+RRULE:FREQ=MONTHLY;BYDAY=-1SA;COUNT=6
+END:VEVENT
+END:VCALENDAR

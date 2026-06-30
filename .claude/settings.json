@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo build:*)",
+      "Bash(cargo test:*)",
+      "Bash(cargo clippy:*)",
+      "Bash(cargo fmt:*)",
+      "Bash(flutter pub get)",
+      "Bash(flutter test:*)",
+      "Bash(flutter analyze)",
+      "Bash(dart format:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(*publish*)"
+    ]
+  },
+  "additionalDirectories": [
+    "docs"
+  ]
+}
