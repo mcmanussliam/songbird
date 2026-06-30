@@ -1,35 +1,98 @@
-// Songbird — Flutter entrypoint.
-//
-// See system-design.md §6.2 for the layering rule this file's structure depends on:
-//   presentation/  -> widgets only, no bridge calls
-//   state/         -> Riverpod providers, owns all bridge calls and stream subscriptions
-//   platform/      -> platform channel code (push, widgets, share sheet, deep links)
-//   plugin_api/    -> Dart-side plugin extension points (§13), stubbed until Phase 3
-//
-// TODO(M3): replace this placeholder with the real app shell once songbird-core (M1) and
-// the flutter_rust_bridge codegen setup (rust_bridge/) are in place.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'platform/notifications.dart';
+import 'state/bridge_provider.dart';
+import 'presentation/calendar_screen.dart';
+import 'presentation/calendar_list_screen.dart';
 
-void main() {
-  runApp(const SongbirdApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initNotifications();
+
+  // TODO(M3 setup): replace BridgeStub with BridgeFrb once
+  // flutter_rust_bridge_codegen generate has been run in app/.
+  // Until then the app runs on stub data so UI can be developed without
+  // the generated bindings.
+  runApp(const ProviderScope(child: SongbirdApp()));
 }
 
-class SongbirdApp extends StatelessWidget {
+final _router = GoRouter(
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) => _AppShell(child: child),
+      routes: [
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: CalendarScreen(),
+          ),
+        ),
+        GoRoute(
+          path: '/calendars',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: CalendarListScreen(),
+          ),
+        ),
+      ],
+    ),
+  ],
+);
+
+class SongbirdApp extends ConsumerWidget {
   const SongbirdApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Initialise the bridge on first build.
+    ref.watch(_initProvider);
+
+    return MaterialApp.router(
       title: 'Songbird',
-      home: Scaffold(
-        body: Center(
-          child: Text(
-            'Songbird — M1 in progress.\n'
-            'See docs/design/system-design.md §14 for milestone status.',
-            textAlign: TextAlign.center,
-          ),
-        ),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A90D9)),
+        useMaterial3: true,
+      ),
+      routerConfig: _router,
+    );
+  }
+}
+
+final _initProvider = FutureProvider<void>((ref) async {
+  final bridge = ref.read(bridgeProvider);
+  // For BridgeFrb the db path comes from path_provider; stub ignores it.
+  await bridge.init(':memory:');
+});
+
+class _AppShell extends StatefulWidget {
+  const _AppShell({required this.child});
+  final Widget child;
+
+  @override
+  State<_AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<_AppShell> {
+  int _index = 0;
+
+  static const _destinations = [
+    NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Calendar'),
+    NavigationDestination(icon: Icon(Icons.list), label: 'Calendars'),
+  ];
+
+  static const _routes = ['/', '/calendars'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) {
+          setState(() => _index = i);
+          context.go(_routes[i]);
+        },
+        destinations: _destinations,
       ),
     );
   }

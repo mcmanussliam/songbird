@@ -22,11 +22,15 @@ thin pointer plus a few operating rules, not a second source of truth.
 Check `docs/design/system-design.md` §14 for the milestone table. **Update this section** when a
 milestone completes, so the next agent session knows where things stand:
 
-> **Status:** M2 complete. `songbird-ical` (RFC 5545 parser/serializer), `songbird-recurrence`
-> (RRULE parser + occurrence expander), `songbird-storage` (SQLite + WAL + migrations + typed
-> repo), and `songbird-caldav-client` (RFC 4791 CalDAV client, two-way sync validated against
-> Radicale) are implemented. Next up: M3 — bare Flutter client app (local calendars + CalDAV
-> sync only, F1–F7 functional).
+> **Status:** M3 in progress. Rust core API (`songbird-core`) implemented: init, list/create
+> calendars, add CalDAV account, create/update/delete events, occurrences_in_range (with
+> recurrence expansion), sync_now (CalDAV sync). Flutter app scaffolded with Bridge abstraction
+> layer (BridgeStub for dev, BridgeFrb once frb codegen runs), Riverpod state providers,
+> CalendarScreen (month grid + day agenda), EventDetailScreen, EventEditScreen,
+> CalendarListScreen, AddCalDavScreen, and local notifications (F7) in platform/.
+> **To activate the real Rust bridge:** install flutter_rust_bridge_codegen, uncomment
+> `flutter_rust_bridge` in pubspec.yaml, run `flutter_rust_bridge_codegen generate` in app/,
+> then wire BridgeFrb into bridgeProvider. Next up: M4 — native sync service.
 
 ## Repository layout
 
