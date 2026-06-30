@@ -17,8 +17,6 @@ edition = "2021"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/songbird-app/songbird"
 
-# Shared dependency versions, pinned once here and inherited via `dep.workspace = true`
-# in each crate's Cargo.toml — keeps the whole workspace on one version of each dep.
 [workspace.dependencies]
 thiserror = "1"
 chrono = { version = "0.4", features = ["serde"] }
@@ -26,3 +24,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync"] }
 uuid = { version = "1", features = ["v4", "serde"] }
+chrono-tz = "0.9"
+rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite_migration = "1"

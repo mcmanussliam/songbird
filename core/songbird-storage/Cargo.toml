@@ -9,9 +9,7 @@ description = "SQLite-backed local store, the canonical on-device source of trut
 thiserror.workspace = true
 chrono.workspace = true
 uuid.workspace = true
-# Finalized per system-design.md §15.1: rusqlite, wrapped in spawn_blocking from the async
-# API surface in songbird-core, rather than adopting sqlx.
-rusqlite = { version = "0.31", features = ["bundled"] }
-rusqlite_migration = "1"
+rusqlite.workspace = true
+rusqlite_migration.workspace = true
 
 [dev-dependencies]
