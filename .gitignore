@@ -13,9 +13,14 @@ app/ios/Pods/
 app/ios/.symlinks/
 app/ios/Flutter/Flutter.framework
 app/ios/Flutter/Flutter.podspec
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/ephemeral/
+app/ios/Flutter/flutter_export_environment.sh
+app/ios/Runner/GeneratedPluginRegistrant.*
 app/android/.gradle/
 app/android/local.properties
 app/android/key.properties
+app/android/**/GeneratedPluginRegistrant.java
 app/**/*.iml
 app/.idea/
 
