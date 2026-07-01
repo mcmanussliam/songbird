@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../bridge/bridge.dart' show EventDraft, EventPatch, OccurrenceView;
 import '../state/calendar_providers.dart';
 import '../state/event_providers.dart';
 import 'widgets/month_grid.dart';
 import 'widgets/agenda_list.dart';
 import 'event_detail_screen.dart';
+
+export '../bridge/bridge.dart' show EventDraft, EventPatch, OccurrenceView;
 
 class CalendarScreen extends ConsumerWidget {
   const CalendarScreen({super.key});
@@ -273,6 +276,3 @@ class _DateTimeRow extends StatelessWidget {
   }
 }
 
-// Re-export EventDraft and EventPatch so calendar_screen.dart callers can use them
-// without a second import. In the final app these come from frb generated code.
-export '../bridge/bridge.dart' show EventDraft, EventPatch, OccurrenceView;
