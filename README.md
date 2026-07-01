@@ -9,19 +9,22 @@ group co-owns, built on open standards, with your data under your control.
 
 ## Status
 
-Pre-implementation. See [`docs/design/system-design.md`](docs/design/system-design.md) §14 for
-the milestone plan and current status.
+M3 in progress. Core Rust library implemented; Flutter UI scaffolded with stub bridge.
+See [`docs/design/system-design.md`](docs/design/system-design.md) §14 for the full milestone
+plan.
 
 ## Repository layout
 
 ```
 songbird/
-├── core/            Rust workspace — the business logic shared by every client
+├── core/            Rust workspace — all business logic shared by every client
 ├── app/             Flutter app (iOS + Android)
-├── sync-service/    Optional managed/self-hostable sync backend
-├── docs/
-│   ├── design/      Full system design + market analysis (read these first)
-│   └── adr/         Architecture Decision Records
+├── server/          Optional managed/self-hostable sync backend (M4+)
+├── tests/           Integration test infrastructure (CalDAV server Docker Compose)
+└── docs/
+    ├── design/      Full system design + market analysis — read these first
+    ├── adr/         Architecture Decision Records
+    └── api/         Generated API docs (cargo doc output)
 ```
 
 ## For contributors and coding agents
@@ -33,5 +36,5 @@ matter (module boundaries, the encryption invariant, the recurrence conformance 
 
 AGPL-3.0-or-later. See [`LICENSE`](LICENSE). The core app is always free, fully functional, and
 self-hostable with full feature parity to any managed/paid tier — see
-`docs/design/system-design.md` §8 (companion market-analysis doc) for the monetization model and
-why this commitment is structural, not just a policy.
+`docs/design/system-design.md` for the monetization model and why this is a structural
+guarantee, not just a policy.
