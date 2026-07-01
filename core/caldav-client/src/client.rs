@@ -26,6 +26,7 @@ impl CalDavClient {
 
     fn check_status(&self, status: StatusCode, url: &str) -> Result<(), CalDavError> {
         let code = status.as_u16();
+
         match code {
             401 | 403 => Err(CalDavError::AuthError { status: code, url: url.to_string() }),
             412 => Err(CalDavError::EtagConflict),
@@ -40,8 +41,10 @@ impl CalDavClient {
         if href.starts_with("http://") || href.starts_with("https://") {
             return Ok(href.to_string());
         }
+
         let base = reqwest::Url::parse(&self.base_url)
             .map_err(|e| CalDavError::Protocol(format!("invalid base URL: {}", e)))?;
+
         base.join(href)
             .map(|u| u.to_string())
             .map_err(|e| CalDavError::Protocol(format!("cannot resolve {}: {}", href, e)))
@@ -50,8 +53,10 @@ impl CalDavClient {
     fn well_known_url(&self) -> Result<String, CalDavError> {
         let mut base = reqwest::Url::parse(&self.base_url)
             .map_err(|e| CalDavError::Protocol(format!("invalid base URL: {}", e)))?;
+
         base.set_path("/.well-known/caldav");
         base.set_query(None);
+
         Ok(base.to_string())
     }
 
@@ -63,8 +68,10 @@ impl CalDavClient {
                 .header("Content-Type", "application/xml; charset=utf-8")
                 .body(body.to_string()),
         ).send().await?;
+
         let status = resp.status();
         self.check_status(status, url)?;
+
         Ok(resp.text().await?)
     }
 
@@ -75,8 +82,10 @@ impl CalDavClient {
                 .header("Content-Type", "application/xml; charset=utf-8")
                 .body(body.to_string()),
         ).send().await?;
+
         let status = resp.status();
         self.check_status(status, url)?;
+
         Ok(resp.text().await?)
     }
 
@@ -166,6 +175,7 @@ impl CalDavClient {
         let url = self.resolve_href(href)?;
         let resp = self.apply_auth(self.http.get(&url)).send().await?;
         self.check_status(resp.status(), &url)?;
+
         Ok(resp.text().await?)
     }
 
@@ -183,19 +193,23 @@ impl CalDavClient {
                 .header("Content-Type", "text/calendar; charset=utf-8")
                 .body(ical.to_string()),
         );
+
         builder = match etag {
             Some(t) => builder.header("If-Match", t),
             None => builder.header("If-None-Match", "*"),
         };
+
         let resp = builder.send().await?;
         let status = resp.status();
         self.check_status(status, &url)?;
+
         let new_etag = resp
             .headers()
             .get("ETag")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_string();
+
         Ok(new_etag)
     }
 
@@ -206,6 +220,7 @@ impl CalDavClient {
         if let Some(t) = etag {
             builder = builder.header("If-Match", t);
         }
+
         let resp = builder.send().await?;
         self.check_status(resp.status(), &url)?;
         Ok(())
@@ -333,12 +348,14 @@ impl CalDavClient {
             ),
             display_name
         );
+
         let url = self.resolve_href(href)?;
         let resp = self.apply_auth(
             self.http.request(method, &url)
                 .header("Content-Type", "application/xml; charset=utf-8")
                 .body(body),
         ).send().await?;
+
         match resp.status().as_u16() {
             201 | 204 => Ok(()),
             405 | 409 => Ok(()), // already exists
