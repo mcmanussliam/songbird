@@ -5,6 +5,7 @@ import 'platform/notifications.dart';
 import 'state/bridge_provider.dart';
 import 'presentation/calendar_screen.dart';
 import 'presentation/calendar_list_screen.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,10 +50,8 @@ class SongbirdApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Songbird',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A90D9)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       routerConfig: _router,
     );
   }
@@ -76,8 +75,16 @@ class _AppShellState extends State<_AppShell> {
   int _index = 0;
 
   static const _destinations = [
-    NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Calendar'),
-    NavigationDestination(icon: Icon(Icons.list), label: 'Calendars'),
+    NavigationDestination(
+      icon: Icon(Icons.calendar_today_outlined),
+      selectedIcon: Icon(Icons.calendar_today),
+      label: 'Calendar',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.layers_outlined),
+      selectedIcon: Icon(Icons.layers),
+      label: 'Calendars',
+    ),
   ];
 
   static const _routes = ['/', '/calendars'];
