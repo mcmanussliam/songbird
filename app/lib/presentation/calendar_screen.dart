@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../bridge/bridge.dart' show EventDraft, EventPatch, OccurrenceView;
+import '../bridge/bridge.dart' show EventDraft, EventPatch;
 import '../state/calendar_providers.dart';
 import '../state/event_providers.dart';
-import 'widgets/month_grid.dart';
-import 'widgets/agenda_list.dart';
 import 'event_detail_screen.dart';
+import 'widgets/agenda_list.dart';
+import 'widgets/month_grid.dart';
 
 export '../bridge/bridge.dart' show EventDraft, EventPatch, OccurrenceView;
 
@@ -74,13 +74,24 @@ class CalendarScreen extends ConsumerWidget {
 
   static String _monthLabel(DateTime m) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[m.month - 1]} ${m.year}';
   }
 
-  Future<void> _createEvent(BuildContext context, WidgetRef ref, DateTime day) async {
+  Future<void> _createEvent(
+      BuildContext context, WidgetRef ref, DateTime day) async {
     final cals = ref.read(calendarsProvider).valueOrNull ?? [];
     if (cals.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -145,7 +156,8 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
   void initState() {
     super.initState();
     _summary = TextEditingController(text: widget.existing?.summary ?? '');
-    _description = TextEditingController(text: widget.existing?.description ?? '');
+    _description =
+        TextEditingController(text: widget.existing?.description ?? '');
     _start = widget.existing?.dtstart ??
         DateTime(widget.initialDate.year, widget.initialDate.month,
             widget.initialDate.day, 9, 0);
@@ -168,7 +180,10 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
           if (_saving)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+              child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
             )
           else
             TextButton(onPressed: _save, child: const Text('Save')),
@@ -179,7 +194,8 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
         children: [
           TextField(
             controller: _summary,
-            decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Title', border: OutlineInputBorder()),
             autofocus: true,
           ),
           const SizedBox(height: 16),
@@ -196,7 +212,8 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
           const SizedBox(height: 16),
           TextField(
             controller: _description,
-            decoration: const InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: 'Notes', border: OutlineInputBorder()),
             maxLines: 4,
           ),
         ],
@@ -214,7 +231,9 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
           widget.calendarId,
           EventDraft(
             summary: _summary.text.trim(),
-            description: _description.text.trim().isEmpty ? null : _description.text.trim(),
+            description: _description.text.trim().isEmpty
+                ? null
+                : _description.text.trim(),
             dtstart: _start,
             dtend: _end,
             isAllDay: false,
@@ -225,7 +244,11 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
           widget.existing!.eventId,
           EventPatch(
             summary: _summary.text.trim(),
-            description: (_description.text.trim().isEmpty ? null : _description.text.trim(),),
+            description: (
+              _description.text.trim().isEmpty
+                  ? null
+                  : _description.text.trim(),
+            ),
             dtstart: _start,
             dtend: _end,
           ),
@@ -239,7 +262,8 @@ class _EventEditScreenState extends ConsumerState<EventEditScreen> {
 }
 
 class _DateTimeRow extends StatelessWidget {
-  const _DateTimeRow({required this.label, required this.value, required this.onChanged});
+  const _DateTimeRow(
+      {required this.label, required this.value, required this.onChanged});
 
   final String label;
   final DateTime value;
@@ -264,15 +288,28 @@ class _DateTimeRow extends StatelessWidget {
           initialTime: TimeOfDay.fromDateTime(value),
         );
         if (time == null) return;
-        onChanged(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+        onChanged(
+            DateTime(date.year, date.month, date.day, time.hour, time.minute));
       },
     );
   }
 
   static String _format(DateTime dt) {
-    final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  '
         '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
-

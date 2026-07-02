@@ -25,12 +25,15 @@ milestone completes, so the next agent session knows where things stand:
 > **Status:** M3 in progress. Rust core API (`songbird-core`) implemented: init, list/create
 > calendars, add CalDAV account, create/update/delete events, occurrences_in_range (with
 > recurrence expansion), sync_now (CalDAV sync). Flutter app scaffolded with Bridge abstraction
-> layer (BridgeStub for dev, BridgeFrb once frb codegen runs), Riverpod state providers,
-> CalendarScreen (month grid + day agenda), EventDetailScreen, EventEditScreen,
-> CalendarListScreen, AddCalDavScreen, and local notifications (F7) in platform/.
-> **To activate the real Rust bridge:** install flutter_rust_bridge_codegen, uncomment
-> `flutter_rust_bridge` in pubspec.yaml, run `flutter_rust_bridge_codegen generate` in app/,
-> then wire BridgeFrb into bridgeProvider. Next up: M4 — native sync service.
+> layer, Riverpod state providers, CalendarScreen (month grid + day agenda), EventDetailScreen,
+> EventEditScreen, CalendarListScreen, AddCalDavScreen, and local notifications (F7) in
+> platform/. **Real Rust bridge is now active:** `flutter_rust_bridge_codegen` generates
+> `app/lib/bridge_generated/` (gitignored) from `core/core/src/api.rs`; config lives in
+> `app/flutter_rust_bridge.yaml`, regenerate with `flutter_rust_bridge_codegen generate` from
+> `app/`. `bridgeProvider` now defaults to `BridgeFrb`; `BridgeStub` remains for widget tests.
+> `EventPatch`'s nullable-field updates use a `NullableStringUpdate` wrapper struct (frb can't
+> bind `Option<Option<T>>`). App reads/writes SQLite via `path_provider` at
+> `<app documents dir>/songbird.sqlite3`. Next up: M4 — native sync service.
 
 ## Repository layout
 
@@ -51,7 +54,9 @@ songbird/
 │   ├── lib/state/           Riverpod providers, owns all bridge calls
 │   ├── lib/platform/        push registration, widgets, share sheet, deep links
 │   ├── lib/plugin_api/      plugin extension points (§13), stubbed in Phase 1
-│   └── rust_bridge/         flutter_rust_bridge generated + hand-written glue
+│   ├── lib/bridge/          hand-written Bridge interface + BridgeFrb/BridgeStub impls
+│   ├── lib/bridge_generated/ flutter_rust_bridge generated Dart bindings (gitignored)
+│   └── rust_builder/        cargokit-based Flutter FFI plugin that builds songbird_core
 ├── server/                  Backend, see §7 — songbird-server crate
 │   └── deploy/              Docker Compose self-hosting on-ramp
 ├── tests/caldav-servers/    Docker Compose for CalDAV integration test servers

@@ -99,18 +99,29 @@ pub struct EventDraft {
     pub rrule: Option<String>,
 }
 
-/// Partial update — only `Some` fields are written; `None` leaves the existing value unchanged.
-/// For nullable fields (description, location, timezone, rrule), `Some(None)` means "clear it."
+/// Wraps a nullable field update so `Option<NullableStringUpdate>` can distinguish
+/// "leave unchanged" (`None`) from "set" (`Some`, whose inner `value` may itself be `None`
+/// to clear the field)
+///
+/// `flutter_rust_bridge` cannot generate bindings for `Option<Option<T>>`.
+#[derive(Debug, Clone)]
+pub struct NullableStringUpdate {
+    pub value: Option<String>,
+}
+
+/// Partial update, only `Some` fields are written; `None` leaves the existing value unchanged.
+/// For nullable fields, a present update whose
+/// `value` is `None` means "clear it."
 #[derive(Debug, Clone)]
 pub struct EventPatch {
     pub summary: Option<String>,
-    pub description: Option<Option<String>>,
-    pub location: Option<Option<String>>,
+    pub description: Option<NullableStringUpdate>,
+    pub location: Option<NullableStringUpdate>,
     pub dtstart_ms: Option<i64>,
     pub dtend_ms: Option<i64>,
     pub is_all_day: Option<bool>,
-    pub timezone: Option<Option<String>>,
-    pub rrule: Option<Option<String>>,
+    pub timezone: Option<NullableStringUpdate>,
+    pub rrule: Option<NullableStringUpdate>,
 }
 
 #[derive(Debug, Clone)]
@@ -292,14 +303,14 @@ pub async fn update_event(event_id: String, patch: EventPatch) -> Result<(), Cor
     repo.update_event(&UpdateEvent {
         id: event_id,
         summary: patch.summary.unwrap_or(existing.summary),
-        description: patch.description.unwrap_or(existing.description),
-        location: patch.location.unwrap_or(existing.location),
+        description: patch.description.map(|u| u.value).unwrap_or(existing.description),
+        location: patch.location.map(|u| u.value).unwrap_or(existing.location),
         dtstart_ms: patch.dtstart_ms.unwrap_or(existing.dtstart_ms),
         dtstart_is_date_only: is_all_day,
         dtend_ms: patch.dtend_ms.unwrap_or(existing.dtend_ms),
         dtend_is_date_only: is_all_day,
-        timezone: patch.timezone.unwrap_or(existing.timezone),
-        rrule: patch.rrule.unwrap_or(existing.rrule),
+        timezone: patch.timezone.map(|u| u.value).unwrap_or(existing.timezone),
+        rrule: patch.rrule.map(|u| u.value).unwrap_or(existing.rrule),
         rdate: None,
         exdate: None,
         sequence: existing.sequence + 1,

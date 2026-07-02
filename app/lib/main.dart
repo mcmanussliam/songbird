@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
 import 'platform/notifications.dart';
-import 'state/bridge_provider.dart';
-import 'presentation/calendar_screen.dart';
 import 'presentation/calendar_list_screen.dart';
+import 'presentation/calendar_screen.dart';
+import 'state/bridge_provider.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initNotifications();
 
-  // TODO(M3 setup): replace BridgeStub with BridgeFrb once
-  // flutter_rust_bridge_codegen generate has been run in app/.
-  // Until then the app runs on stub data so UI can be developed without
-  // the generated bindings.
   runApp(const ProviderScope(child: SongbirdApp()));
 }
 
@@ -59,8 +58,8 @@ class SongbirdApp extends ConsumerWidget {
 
 final _initProvider = FutureProvider<void>((ref) async {
   final bridge = ref.read(bridgeProvider);
-  // For BridgeFrb the db path comes from path_provider; stub ignores it.
-  await bridge.init(':memory:');
+  final docsDir = await getApplicationDocumentsDirectory();
+  await bridge.init(p.join(docsDir.path, 'songbird.sqlite3'));
 });
 
 class _AppShell extends StatefulWidget {

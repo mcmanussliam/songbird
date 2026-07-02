@@ -1,0 +1,5 @@
+rust_input: crate::api
+rust_root: ../core/core
+dart_output: lib/bridge_generated
+rust_output: ../core/core/src/frb_generated.rs
+dart_entrypoint_class_name: RustLib

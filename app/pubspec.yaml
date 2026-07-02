@@ -16,8 +16,11 @@ dependencies:
   riverpod_annotation: ^2.3.0
   go_router: ^14.0.0
   flutter_local_notifications: ^17.0.0
-  # Uncomment after running `flutter_rust_bridge_codegen generate` in this directory.
-  # flutter_rust_bridge: ^2.0.0
+  flutter_rust_bridge: 2.12.0
+  path_provider: ^2.1.0
+  path: ^1.9.0
+  songbird_core:
+    path: rust_builder
 
 dev_dependencies:
   flutter_test:
